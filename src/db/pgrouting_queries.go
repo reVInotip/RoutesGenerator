@@ -47,7 +47,7 @@ func (pgr *PGRoutingQueries) BuildRout(points *[]utils.Point) (int64, string, fl
 
 		err := pgr.Connection.QueryRow(context.Background(), query).Scan(&vertexId);
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Map geo-point to graph vertex failed: %v\n", err)
 			return -1, "", -1
 		}
 
@@ -88,14 +88,13 @@ func (pgr *PGRoutingQueries) BuildRout(points *[]utils.Point) (int64, string, fl
 		GROUP BY PathId
 		ORDER BY PathId`, verticesString)
 	
-	
 	var pathId int64
 	var routeGeom string
 	var routeLength float64
 	err := pgr.Connection.QueryRow(context.Background(), query).Scan(&pathId, &routeGeom, &routeLength);
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		return -1, "", -1
+		fmt.Fprintf(os.Stderr, "Build road failed: %v\n", err)
+		return 0, "{\"type\":\"LineString\",\"coordinates\":[[]]}", 0
 	}
 
 	return pathId, routeGeom, routeLength
